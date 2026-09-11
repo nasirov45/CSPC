@@ -1,23 +1,35 @@
-# CSPC
-Computer Science Programming Course(cspc)
+# CSPC - Computer Science for Physics and Chemistry
 
-## PW1 — Lab A
+My coursework repository. Each practical is under PW<n>/Lab <X>/.
 
-### Tests
-All three tests pass successfully with `pytest -v`.
+## Setup
 
-- Test for initial atom count: passed
-- Test for negative decay rate: passed
-- Test comparing the simulation average with the analytical law: passed
+Create the environment for a given lab:
 
-### Speed comparison
+```bash
+conda env create -f PW<n>/Lab\ <X>/environment.yml
+conda activate cspc
+```
 
-The simulation was tested with 200,000 atoms.
+---
 
-- Pure-Python loop: **1.830334 seconds**
-- NumPy version: **0.000155 seconds**
-- NumPy speed-up: **11,780.18× faster**
+## PW1 - Lab A: Reproducible Foundations
 
-### Conclusion
+**What I built:**
 
-The NumPy vectorised implementation is significantly faster than the pure-Python loop while producing the same type of decay simulation. The speed comparison shows that NumPy is much more efficient for large numbers of atoms.
+* Implemented pure-Python and NumPy versions of a radioactive decay simulation.
+* Added tests for the initial atom count, negative decay rates, and the analytical decay law.
+
+**Speed comparison (loop vs NumPy):**
+
+* loop : 1.830334 s
+* numpy : 0.000155 s
+* speed-up: 11780.18 x faster
+
+**Tests:** all passing? **Yes**
+
+**Conclusion:**
+
+* All three tests passed successfully.
+* The NumPy implementation was much faster than the pure-Python loop for 200,000 atoms.
+* I learned how vectorisation can significantly improve performance and how pytest can be used to test different parts of a simulation.
