@@ -33,3 +33,11 @@ conda activate cspc
 * All three tests passed successfully.
 * The NumPy implementation was much faster than the pure-Python loop for 200,000 atoms.
 * I learned how vectorisation can significantly improve performance and how pytest can be used to test different parts of a simulation.
+
+## PW1 --- Lab B
+
+The observed decay data showed a decreasing number of counts over time, following the expected decay pattern.
+
+The observed data matched the analytical decay law reasonably well, as the points followed a similar decreasing shape to the analytical curve.
+
+The Snakemake pipeline takes the observed CSV data and `plot.py` as inputs and automatically generates `figure.png`, rebuilding it whenever an input file changes.
