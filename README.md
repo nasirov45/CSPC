@@ -41,3 +41,19 @@ The observed decay data showed a decreasing number of counts over time, followin
 The observed data matched the analytical decay law reasonably well, as the points followed a similar decreasing shape to the analytical curve.
 
 The Snakemake pipeline takes the observed CSV data and `plot.py` as inputs and automatically generates `figure.png`, rebuilding it whenever an input file changes.
+
+
+## PW2 — Lab A
+
+### Motion from Tracking Data
+
+The mean acceleration calculated from the free-fall data was **-8.58 m/s²**, which is close to the expected value of **-9.81 m/s²**.
+
+The acceleration is much noisier than the position because differentiation amplifies small measurement errors and noise in the data.
+
+After integrating the acceleration twice, the recovered position was close to the original position. The largest difference was approximately **0.785 m**, which is within the expected 1 metre difference.
+
+### Bonus — 2D Trajectory
+
+For the 2D trajectory data, the x and y coordinates were differentiated separately using `np.gradient` to calculate the velocity in each direction. The speed was then calculated from the x and y velocity components and plotted against time.
+
