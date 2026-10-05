@@ -57,3 +57,27 @@ After integrating the acceleration twice, the recovered position was close to th
 
 For the 2D trajectory data, the x and y coordinates were differentiated separately using `np.gradient` to calculate the velocity in each direction. The speed was then calculated from the x and y velocity components and plotted against time.
 
+
+## PW2 — Lab B
+
+### Optimisation in Chemistry
+
+Three optimisation methods were compared: gradient descent, Newton's method, and SLSQP. For the simple convex function, all three methods converged to the same minimum at approximately **x = 3**.
+
+For the more complicated function, the methods did not always give the same result. The starting point affected the result because the function has multiple stationary points. Newton's method can converge to a maximum as well as a minimum, so the second derivative must be checked. This shows that both the starting point and the optimisation algorithm matter for a more complicated landscape.
+
+### Reaction Rate
+
+The first-order reaction data was fitted using SLSQP. The fitted rate constant **k** was close to **0.25**, and the fitted exponential curve followed the measured concentration data.
+
+### Chemical Equilibrium
+
+For the reaction H₂ + I₂ ⇌ 2HI, the equilibrium extent was found using both Newton's method and SLSQP. Both methods gave approximately the same equilibrium value. The equilibrium composition was calculated from:
+
+* H₂ = 1 − x mol
+* I₂ = 1 − x mol
+* HI = 2x mol
+
+### Titration Equivalence Point
+
+The pH slope was calculated using `np.gradient`. The equivalence point was found by locating the volume where the slope was largest. The equivalence point was approximately **50 mL**, where the pH curve changes most rapidly.
