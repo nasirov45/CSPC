@@ -1,0 +1,22 @@
+Earthquake Seismic Event Summary
+=====================
+
+Record: seismogram_A.csv
+  P-wave arrival (tP): 108.42 s
+  S-wave arrival (tS): 144.08 s
+  Epicentral distance (R): 306.13 km
+  Origin time (t0): 59.04 s
+  Peak Ground Velocity (PGV): 1.5105 cm/s
+  Estimated Magnitude (M): 6.66
+
+Record: seismogram_B.csv
+  P-wave arrival (tP): 84.25 s
+  S-wave arrival (tS): 102.43 s
+  Epicentral distance (R): 156.07 km
+  Origin time (t0): 59.08 s
+  Peak Ground Velocity (PGV): 0.5711 cm/s
+  Estimated Magnitude (M): 5.36
+
+Comparison:
+  Closer earthquake: seismogram_B.csv (156.07 km)
+  Stronger earthquake: seismogram_A.csv (M = 6.66)

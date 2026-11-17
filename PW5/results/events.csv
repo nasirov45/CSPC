@@ -1,0 +1,3 @@
+record,tP_s,tS_s,R_km,origin_t0_s,PGV_cm_s,M
+seismogram_A.csv,108.42,144.08,306.13,59.04,1.5105,6.66
+seismogram_B.csv,84.25,102.43,156.07,59.08,0.5711,5.36

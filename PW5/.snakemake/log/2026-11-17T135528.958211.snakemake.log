@@ -1,0 +1,55 @@
+Assuming unrestricted shared filesystem usage.
+
+SNAKEMAKE
+=========
+  Date: 2026-11-17 13:55:28
+  Workflow ID: e3142bbf-8595-4f2b-87be-2a6f2ed21d9a
+  Platform: Linux-7.0.0-31-generic-x86_64-with-glibc2.43
+  Host: MyHP
+  User: nasirov
+  Snakemake version: 9.27.0
+  Python version: 3.11.16 (main, Sep  2 2026, 23:39:52) [GCC 15.3.0]
+  Command: /home/nasirov/miniconda3/envs/cspc/bin/snakemake --cores 1
+  Snakefile: /home/nasirov/Downloads/CSPC/PW5/Snakefile
+  Base directory: /home/nasirov/Downloads/CSPC/PW5
+  Run directory: /home/nasirov/Downloads/CSPC/PW5
+  Working directory: /home/nasirov/Downloads/CSPC/PW5
+  Config file(s): []
+  Config MD5: 99914b932bd37a50b983c5e7c90ae93b
+
+Building DAG of jobs...
+Using shell: /usr/bin/bash
+Provided cores: 1 (use --cores to define parallelism)
+Rules claiming more threads will be scaled down.
+Job stats:
+job       count
+------  -------
+report        1
+all           1
+total         2
+
+Select jobs to execute...
+Execute 1 jobs...
+[Tue Nov 17 13:55:29 2026]
+localrule report:
+    input: results/events.csv, report.py
+    output: results/report.txt
+    jobid: 1
+    reason: Updated input files: report.py
+    resources: tmpdir=/tmp
+[Tue Nov 17 13:55:29 2026]
+Finished jobid: 1 (Rule: report)
+1 of 2 steps (50%) done
+Select jobs to execute...
+Execute 1 jobs...
+[Tue Nov 17 13:55:29 2026]
+localrule all:
+    input: results/report.txt
+    jobid: 0
+    reason: Input files updated by another job: results/report.txt
+    resources: tmpdir=/tmp
+[Tue Nov 17 13:55:29 2026]
+Finished jobid: 0 (Rule: all)
+2 of 2 steps (100%) done
+Complete log(s): /home/nasirov/Downloads/CSPC/PW5/.snakemake/log/2026-11-17T135528.958211.snakemake.log
+Elapsed time: 0:00:00.451308

@@ -430,3 +430,103 @@ Raw unscaled K-Means achieved a much lower agreement (0.7022) because Euclidean 
 Standardizing all 13 features puts every measurement on equal footing, increasing agreement to 0.9663 (separating 100% of cultivar 0 and cultivar 2 cleanly, with only 6 wines from cultivar 1 overlapping). K-Means on the first two standardized principal components achieved the exact same agreement (0.9663), showing that although PC1 and PC2 retain 55.41% of total variance, they already capture the main chemical separation among the three cultivars.
 
 Because K-Means never used the true labels during fitting, this high agreement indicates that the three grape cultivars possess distinct, naturally separable chemical profiles.
+
+
+# PW5 — Signal Processing: Where Was the Earthquake, and How Strong?
+
+## 1. Visualising the Seismic Record
+
+The seismic records are sampled at $f_s = 100\text{ Hz}$ over 300 s (30,000 samples) across three channels: Z (vertical), N (north-south), and E (east-west).
+
+* **Wave arrivals:** The first, weaker arrival (P-wave) appears most clearly on the **Z (vertical)** channel because P-waves are longitudinal compressional waves whose ground motion is oriented mostly vertically when arriving from below. The second, much stronger shaking (S-wave and surface waves) is largest on the horizontal **N** and **E** channels because S-waves are transverse shear waves.
+* **Background noise:** Zooming into the first 60 s shows that the station is never completely still before the earthquake; continuous low-amplitude oscillations (~0.004–0.007 mm/s) are present on all three channels due to ambient seismic background noise.
+
+Generated figures: `results/1_raw_channels.png`, `results/1_quiet_zoom.png`.
+
+## 2. Frequency Spectrum (FFT)
+
+* **Role of `fftfreq` and symmetry:** Plotting the FFT amplitude against array index shows only integer bin numbers (0 to 29,999), whereas `np.fft.fftfreq` converts each bin into physical frequencies in Hz (from $-50\text{ Hz}$ to $+50\text{ Hz}$, the Nyquist frequency). Because the input seismogram is purely real-valued, its discrete Fourier transform obeys Hermitian symmetry ($X[-f] = X[f]^*$), making the amplitude spectrum mirrored around 0 Hz.
+* **Microseism vs earthquake energy:** On log-log axes, the quiet first 60 s peaks in the **0.1–0.4 Hz** band (specifically around 0.15–0.25 Hz). This low-frequency background peak is the ocean *microseism*, generated globally by ocean waves coupling into the seafloor. In contrast, the earthquake adds most of its energy in the **0.5–10 Hz** frequency band.
+
+Generated figures: `results/2a_fft_index_vs_freq.png`, `results/2b_loglog_spectrum.png`.
+
+## 3. Inverse FFT and Manual Band-Pass Filter
+
+* **Round-trip property:** `np.allclose(np.fft.ifft(np.fft.fft(Z)).real, Z)` returned `True`. Frequency-domain filtering relies on this exact invertibility so that zeroing out unwanted frequency bins and applying `ifft` reconstructs a clean time-domain signal without distorting the remaining frequencies.
+* **Cut-off justification ($a = 0.5\text{ Hz}$, $b = 10\text{ Hz}$):** From the log-log spectra in Step 2, frequencies below $0.5\text{ Hz}$ are dominated by the strong ocean microseism, while frequencies above $10\text{ Hz}$ consist mainly of high-frequency instrumental and local noise with little earthquake energy.
+* **Removed signal (`Z - Z_filtered`):** Plotting the removed component reveals a smooth, slow oscillation with a period of roughly 4–7 seconds (~0.15–0.25 Hz), confirming that the filter isolated and removed the low-frequency microseism and surface-wave drift while preserving the sharp seismic arrivals.
+
+Generated figure: `results/3c_removed_signal.png`.
+
+## 4. Signal Envelope and Smoothing Window
+
+Envelopes were computed as the moving average of $|x|$ for windows of 0.05 s, 0.5 s, and 5.0 s:
+
+* **Window too short (0.05 s):** The envelope remains jagged and follows individual wave cycles, creating false spikes that can trigger premature arrival detections.
+* **Window too long (5.0 s):** The envelope smears the onset backward and forward in time, blurring the sharp start of the P- and S-waves and shifting the detected arrival times.
+* **Chosen window (0.5 s):** Smooths out individual cycle oscillations while keeping the onset sharp enough for accurate arrival picking.
+
+Generated figure: `results/4_envelopes_comparison.png`.
+
+## 5. P- and S-Wave Arrival Times
+
+For `seismogram_A.csv`, the P-wave arrival (first exceedance of 5% of the Z envelope maximum) occurs at **$t_P = 108.42\text{ s}$**, and the S-wave arrival (first exceedance of 10% of the horizontal envelope maximum after $t_P + 2\text{ s}$) occurs at **$t_S = 144.08\text{ s}$**.
+
+Using `find_peaks`, the maximum of the horizontal envelope occurs later at **$t_{\max} = 152.03\text{ s}$** (7.95 s after $t_S$). Using the maximum instead of the onset would overestimate $t_S - t_P$ and yield an overestimated distance of **374.38 km** instead of **306.13 km**, because seismic wave packets build up gradually after their initial arrival rather than reaching peak amplitude instantaneously.
+
+Generated figure: `results/5_arrivals.png`.
+
+## 6. Epicentral Distance and Origin Time
+
+Using $v_P = 6.2\text{ km/s}$ and $v_S = 3.6\text{ km/s}$:
+
+$$
+R = \frac{t_S - t_P}{\frac{1}{v_S} - \frac{1}{v_P}} = \frac{144.08 - 108.42}{\frac{1}{3.6} - \frac{1}{6.2}} = 306.13\text{ km}.
+$$
+
+* **Uncertainty:** Each 1 s uncertainty in $t_S$ changes $R$ by $\frac{1}{1/3.6 - 1/6.2} = \mathbf{8.58\text{ km}}$.
+* **Origin time:** $t_0 = t_P - R / v_P = 108.42 - 306.13 / 6.2 = \mathbf{59.04\text{ s}}$.
+
+## 7. Spectrogram (Time–Frequency Analysis)
+
+The spectrogram of the raw Z channel up to 10 Hz shows how frequency content evolves over time:
+
+1. **P-wave (~108.4 s):** Arrives first with the **highest frequencies** (extending up to ~8–10 Hz).
+2. **S-wave (~144.1 s):** Arrives second with strong intermediate-to-high energy (~1–8 Hz).
+3. **Surface waves (>155 s):** Arrive last and travel slowest, carrying the **lowest frequencies** (<1–2 Hz) with prolonged duration.
+
+Unlike the single FFT spectrum in Step 2—which averages frequency amplitudes across the entire 300 s recording and loses all timing information—the spectrogram resolves **when** each frequency band arrives.
+
+Generated figure: `results/7_spectrogram.png`.
+
+## 8. Earthquake Magnitude
+
+For `seismogram_A.csv`, the raw horizontal peak ground velocity is $\text{PGV} = 1.5105\text{ cm/s}$ at $R = 306.13\text{ km}$, giving:
+
+$$
+M = \frac{\log_{10}(1.5105) + \log_{10}(306.13) + 1.0}{0.55} = 6.66.
+$$
+
+* **Role of $\log_{10} R$:** Seismic wave amplitudes decay with distance due to geometrical spreading and attenuation. Without the $\log_{10} R$ term, recording the exact same earthquake twice as far away (where PGV is smaller) would produce an artificially smaller magnitude estimate.
+* **Scaling with magnitude:** Increasing $M$ by 1 unit increases the numerator by $0.55$, so $\log_{10}(\text{PGV})$ increases by $0.55$, meaning PGV at the same distance is **$10^{0.55} \approx 3.55$ times larger**.
+
+## 9. Comparison of Both Earthquakes
+
+Running `analyse.py` and `report.py` on both recordings produces `results/events.csv` and `results/report.txt`:
+
+| Record | $t_P$ (s) | $t_S$ (s) | Distance $R$ (km) | Origin Time $t_0$ (s) | PGV (cm/s) | Magnitude $M$ |
+| :--- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `seismogram_A.csv` | 108.42 | 144.08 | 306.13 | 59.04 | 1.5105 | 6.66 |
+| `seismogram_B.csv` | 84.25 | 102.43 | 156.07 | 59.08 | 0.5711 | 5.36 |
+
+* **Closer earthquake:** `seismogram_B.csv` ($156.07\text{ km}$ vs. $306.13\text{ km}$).
+* **Stronger earthquake:** `seismogram_A.csv` ($M = 6.66$ vs. $M = 5.36$).
+
+## 10. Workflow Automation with Snakemake
+
+A `Snakefile` with three rules (`analyse`, `report`, and `all`) automates the pipeline so that `snakemake --cores 1` reproduces `results/events.csv` and `results/report.txt`.
+
+* **(a) Clean rebuild (`rm -rf results && snakemake --cores 1`):** Snakemake created `results/` automatically and ran `analyse` followed by `report` and `all`.
+* **(b) Immediate re-run (`snakemake --cores 1`):** Snakemake reported *"Nothing to be done (all requested files are present and up to date)"* because all target files existed and were newer than their inputs.
+* **(c) Editing `report.py`:** Only `report` (and `all`) reran; `analyse` was skipped because neither `analyse.py` nor the input CSVs changed.
+* **(d) Editing cut-off `b` in `analyse.py`:** Both `analyse` and `report` reran because `analyse.py` is an input to `analyse`, which regenerated `results/events.csv`, triggering `report` downstream. Separating analysis from formatting avoids recomputing heavy signal processing when only report text is modified, while guaranteeing full downstream updates whenever physics parameters change.
